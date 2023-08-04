@@ -14,6 +14,7 @@ import ru.netology.titov.util.AndroidUtils
 import ru.netology.titov.viewmodel.PostViewModel
 
 class MainActivity : AppCompatActivity() {
+    private var isEditing: Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -27,12 +28,17 @@ class MainActivity : AppCompatActivity() {
         val adapter = PostAdapter(
             object : PostEventListener {
                 override fun onEdit(post: Post) {
-                    viewModel.editContent(post)
-                    binding.group.visibility = View.VISIBLE
+                    if (!isEditing) {
+                        isEditing = true
+                        viewModel.editContent(post)
+                        binding.group.visibility = View.VISIBLE
+                    }
                 }
 
                 override fun onRemove(post: Post) {
+                    if (!isEditing) {
                     viewModel.removeById(post.id)
+                }
                 }
 
                 override fun onLike(post: Post) {
@@ -59,6 +65,7 @@ class MainActivity : AppCompatActivity() {
                 text = it.content
             }
             binding.content.setText(it.content)
+
         }
 
         binding.save.setOnClickListener {
@@ -77,6 +84,7 @@ class MainActivity : AppCompatActivity() {
                 clearFocus()
                 AndroidUtils.hideKeyboard(this)
                 binding.group.visibility = View.GONE
+                isEditing = false // Clear the edit state
             }
         }
 
@@ -86,7 +94,8 @@ class MainActivity : AppCompatActivity() {
                 clearFocus()
                 AndroidUtils.hideKeyboard(this)
                 binding.group.visibility = View.GONE
-                  viewModel.saveContent()
+                viewModel.saveContent()
+                isEditing = false // Clear the edit state
             }
         }
     }
